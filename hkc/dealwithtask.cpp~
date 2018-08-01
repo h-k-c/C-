@@ -3,10 +3,24 @@ using namespace _home;
 void Devil::dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]){
     //通过循环来遍历容器中的节点，然后当便利到一个节点的时候就执行节点里面里面的动作。
     cout<<"开始执行动作"<<endl;
-    vector<Btree*>::iterator testit;//用来遍历容器中的节点；
-    multimap<int,multimap<int,string> >::iterator testis;//用来遍历结构体中的multimap；
-    multimap<int,string>::iterator testisc;//用来遍历map中的second；
+    //Btree *copy=new Btree();//用来赋值节点；
+   //cout<<"hhhhhhhhhh"<<endl;
+    // std::vector<Btree*>::iterator point;
+    string askloc;//用来存储询问结果
+    string str1;
+    string str2;
+    std::vector<Btree*>::iterator testit;//用来遍历容器中的节点；
+    std::multimap<int,multimap<int,string> >::iterator testis;//用来遍历结构体中的multimap；
+    std::multimap<int,string>::iterator testisc;//用来遍历map中的second；
     int i=1;
+    //用于处理机器人在任务物体的特殊情况，但是不知道为什么有段错误
+    /*for(std::vector<Btree*>::iterator point=Tasktree.begin();point!=Tasktree.end();point++){
+        if(((*point)->taskmultimap.begin())->first==robot.getLoc()){
+            copy=*point;
+            Tasktree.insert(Tasktree.begin(),copy);
+            (*point)->sortNum=0;
+        }
+    }*/
     for(testit=Tasktree.begin();testit!=Tasktree.end();testit++){
         cout<<"执行第"<<i<<"个节点的任务"<<endl;
         if((*testit)->sortNum==0){
@@ -18,13 +32,15 @@ void Devil::dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]){
             PutDown(robot.getHold());
             robot.setHold(0);
             sort[robot.getHold()-1].setsLoc(robot.getLoc());
-       }
+        }
         //把机器人盘子中的东西放下，如果有东西的话
-        if(robot.getPlate()!=0){
+     /*   if(robot.getPlate()!=0){
             FromPlate(robot.getPlate());
             PutDown(robot.getPlate());
             robot.setPlate(0);
-        }
+        }*/
+        //添加特殊情况；就是机器人在任务物体的位置的时候，先执行任务，执行过后就打上标记；
+        //主要的思想就是用一节点来保存需要放到第一个的元素，然后给那个元素打上标记； 
         while((*testit)!=NULL){
             for(testis=(*testit)->taskmultimap.begin();testis!=(*testit)->taskmultimap.end();testis++){
                 for(testisc=testis->second.begin();testisc!=testis->second.end();testisc++){
@@ -67,9 +83,12 @@ void Devil::dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]){
                             PickUp(robot.getHold());
                             cout<<"已经把物体拿到手上"<<endl;
                         }
-                        PutDown(testisc->first);
-                        sort[testisc->first-1].setsLoc(testis->first);
-                        cout<<"已经把手中的"<<testisc->first<<"放下了"<<endl;
+                        else{
+                            PutDown(testisc->first);
+                            sort[testisc->first-1].setsLoc(testis->first);
+                            robot.setHold(0);
+                            cout<<"已经把手中的"<<testisc->first<<"放下了"<<endl;
+                        }
                     }
                     if(testisc->second=="putin"){
                         //执行putin动作，putin的物体是testisc-first;
@@ -84,6 +103,7 @@ void Devil::dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]){
                         PutIn(testisc->first,testis->first);
                         sort[testisc->first-1].setsLoc(testis->first);
                         sort[testisc->first-1].setsInside(testis->first);
+                        robot.setHold(0);
                         cout<<"我把"<<testisc->first<<"放到了"<<testis->first<<"中"<<endl;
                     }
                     if(testisc->second=="takeout"){
@@ -94,14 +114,14 @@ void Devil::dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]){
                         if(robot.getHold()!=0){
                             cout<<"我手中有东西，我先把他放到盘子里"<<endl;
                             ToPlate(robot.getHold());
-                            robot.setPlate(robot.getLoc());
+                            robot.setPlate(robot.getHold());
                             robot.setHold(0);
                             cout<<"我的手上没有东西了，准备执行takeout动作"<<endl;
                         }
                         if(sort[testis->first-1].getsClosed()==true){
                             cout<<"容器是关着的，我要把它打开"<<endl;
                             Open(testis->first);
-                            sort[testis->first-1].setsClosed("false");
+                            sort[testis->first-1].setsClosed("opened");
                             cout<<"已经把容器打开"<<endl;
                         }
                         TakeOut(testisc->first,testis->first);
@@ -130,7 +150,7 @@ void Devil::dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]){
                         }
                         if(sort[testisc->first-1].getsClosed()){
                             Close(testisc->first);
-                            sort[testisc->first-1].setsClosed("false");
+                            sort[testisc->first-1].setsClosed("opened");
                         }
                         cout<<"已经打开了"<<testisc->first<<endl;
                     }
@@ -149,5 +169,6 @@ void Devil::dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]){
             }
             *testit=(*testit)->next;
         }
+        i++;
     }
 }

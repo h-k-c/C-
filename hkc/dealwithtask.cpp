@@ -3,10 +3,24 @@ using namespace _home;
 void Devil::dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]){
     //通过循环来遍历容器中的节点，然后当便利到一个节点的时候就执行节点里面里面的动作。
     cout<<"开始执行动作"<<endl;
+    //Btree *copy=new Btree();//用来赋值节点；
+   //cout<<"hhhhhhhhhh"<<endl;
+    // std::vector<Btree*>::iterator point;
+    std::string askloc;//用来存储询问结果
+    std::string str1;
+    std::string str2;
     std::vector<Btree*>::iterator testit;//用来遍历容器中的节点；
     std::multimap<int,multimap<int,string> >::iterator testis;//用来遍历结构体中的multimap；
     std::multimap<int,string>::iterator testisc;//用来遍历map中的second；
     int i=1;
+    //用于处理机器人在任务物体的特殊情况，但是不知道为什么有段错误
+    /*for(std::vector<Btree*>::iterator point=Tasktree.begin();point!=Tasktree.end();point++){
+        if(((*point)->taskmultimap.begin())->first==robot.getLoc()){
+            copy=*point;
+            Tasktree.insert(Tasktree.begin(),copy);
+            (*point)->sortNum=0;
+        }
+    }*/
     for(testit=Tasktree.begin();testit!=Tasktree.end();testit++){
         cout<<"执行第"<<i<<"个节点的任务"<<endl;
         if((*testit)->sortNum==0){
@@ -25,16 +39,48 @@ void Devil::dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]){
             PutDown(robot.getPlate());
             robot.setPlate(0);
         }*/
+        //添加特殊情况；就是机器人在任务物体的位置的时候，先执行任务，执行过后就打上标记；
+        //主要的思想就是用一节点来保存需要放到第一个的元素，然后给那个元素打上标记； 
         while((*testit)!=NULL){
             for(testis=(*testit)->taskmultimap.begin();testis!=(*testit)->taskmultimap.end();testis++){
                 for(testisc=testis->second.begin();testisc!=testis->second.end();testisc++){
+                    if(testis->first==-1){
+                        askloc=AskLoc(testisc->first);
+                        if(askloc=="unknown"){
+                            //如果没得到答案，就再次询问，也只最后一次询问
+                            askloc=AskLoc(testisc->first);
+                        }
+                         str1=askloc.substr(0,askloc.find("("));
+                         cout<<str1<<endl;
+                        if(str1=="inside"){
+                             str2=askloc.substr(askloc.find(",")+1,1);
+                             cout<<str2<<endl;
+                             sort[testisc->first-1].setsInside(atoi(str2.c_str()));
+                        }
+                        if(str1=="at"){
+                             str2=askloc.substr(askloc.find(",")+1,1);
+                             cout<<str2<<endl;
+                             sort[testisc->first-1].setsLoc(atoi(str2.c_str()));
+                        }
+                    }
                     //首先让机器人走到指定节点的位置，也就是节点的testis->first;
                     //首先判断机器人是否在那个位置，如果不在就走过去；
                     if(robot.getLoc()!=testis->first){
-                        cout<<"机器人没有在"<<testis->first<<"这个位置"<<endl;
-                        Move(testis->first);
-                        robot.setLoc(testis->first);
-                        cout<<"机器人走到了"<<testis->first<<"这个位置"<<endl;
+                        if(testis->first==-1&&robot.getLoc()==sort[testisc->first-1].getsLoc()){
+                             cout<<"我已经在这里了"<<endl;
+                        }
+                        else if(testis->first==-1&&robot.getLoc()!=sort[testisc->first-1].getsLoc()){
+                             cout<<"机器人没有在"<<sort[testisc->first-1].getsLoc()<<"这个位置"<<endl;
+                             Move(sort[testisc->first-1].getsLoc());
+                             robot.setLoc(sort[testisc->first-1].getsLoc());
+                             cout<<"机器人已经走到了"<<sort[testisc->first-1].getsLoc()<<"的位置"<<endl;
+                        }
+                        else{
+                             cout<<"机器人没有在"<<testis->first<<"这个位置"<<endl;
+                             Move(testis->first);
+                             robot.setLoc(testis->first);
+                             cout<<"机器人走到了"<<testis->first<<"这个位置"<<endl; 
+                            }
                     }
                     //然后再判断初始化的时候把机器人手上的东西放下，在符合约束条件情况下；
                     //然后判断动作进行执行
