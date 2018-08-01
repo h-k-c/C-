@@ -1,0 +1,6 @@
+#include "Sort.h"
+#include "createTree.h"
+#include "Robot.h"
+#include "cserver/plug.hpp"
+using namespace std;
+void dealWithTask(vector<tNode*> TaskTree,Robot robot,Sort sort[]);

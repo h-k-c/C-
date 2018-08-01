@@ -1,0 +1,13 @@
+#ifndef __home_createTree_h__
+#define __home_createTree_h__
+#include<iostream>
+#include<vector>
+#include"Task.h"
+#include"Sort.h"
+#include"Node.h"
+using namespace std;
+int findSortByName(string name,string color,int sNum,Sort sort[]);
+int findStateByName(int sortNum,int sNum,Sort sort[]);
+int findHuman(Sort sort[],int sNum);
+void  ReintegrationTask(vector<tNode*> taskLin);
+void CreateAndPut(vector<tNode*> taskTree,Task task[],Sort sort[],int sNum,int taskNum);

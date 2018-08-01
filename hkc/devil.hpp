@@ -1,0 +1,36 @@
+/*
+ * Simulation@Home Competition
+ * File: devil.hpp
+ * Author: Jiongkun Xie
+ * Affiliation: Multi-Agent Systems Lab.
+ *              University of Science and Technology of China
+ */
+
+#ifndef __home_devil_HPP__
+#define __home_devil_HPP__
+
+#include "cserver/plug.hpp"
+#include "class.h"
+#include "Node.h"
+#include <vector>
+namespace _home
+{
+
+    class Devil : public Plug
+    {
+    public:
+        Devil();
+
+	    //void dealWithTask(vector<Btree*> &Tasktree,Robot &robot,Sort sort[]);
+        void CreateAndPut(vector<Btree*> &Tasktree,Task task[],Sort sort[],int Num,int taskNum); 
+        void dealWithTask(vector<Btree*> Tasktree,Robot &robot,Sort sort[]);
+    protected:
+        void Plan();
+
+        void Fini();
+    };//Plug
+
+}//_home
+
+#endif//__home_devil_HPP__
+//end of file
