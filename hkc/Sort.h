@@ -22,11 +22,16 @@ public:
         void setsType(string type);
 		void setsBigSort(string name);
         void setsLock();
+    void setIsTask(int istask);
         void setsConsnot(string action);
 		void setStatic(string name);
+        void setsLockSort(int locksortname);
+        int getsLockSort();
+        void getsBigSort();
         int getsNum();
         int getsLoc();
         int getsInside();
+    int getIsTask();
         void reduce(string name);
         string getsName();
         string getsColor();
@@ -45,7 +50,7 @@ public:
 		vector<int> sinsideD;	//针对大物体内有哪个小物体
 
 		int haveSmallSort;
-
+         int locksortname;
 		int errorCount;
 		int needMatch; //针对同名物体设立
 		static int count;	//记录物体的数量
@@ -55,10 +60,11 @@ public:
 private:
         int snum;
         int sloc;
+        int istask;
         int sinside;	//针对小物体处于哪个大物体内
         string sname;
         string scolor;
-        string ssize;
+        string ssize; 
         bool scontainer;
         bool sclosed;
         int cons_not;

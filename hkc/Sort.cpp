@@ -17,10 +17,11 @@ Sort::Sort()
     sname="N_N";
     ssize="N_S";
     scolor=" ";
- 
+    locksortname=0; 
     scontainer=false;
     sclosed=true;
     slock=false;
+    istask=0;
     cons_not = 0;
 	bigSort = 1;
 	used = 0;
@@ -44,6 +45,9 @@ void Sort::setsLoc(int Loc)
 void Sort::setsInside(int inside)
 {
     sinside=inside;
+}
+void Sort::setsLockSort(int _locksortname){
+    locksortname=_locksortname;
 }
 void Sort::setsSize(string _size)
 {
@@ -119,6 +123,12 @@ int Sort::getsNum()
 {
     return snum;
 }
+void Sort::setIsTask(int _istask){
+    istask=_istask;
+}
+int Sort::getIsTask(){
+    return istask;
+}
 int Sort::getsLoc()
 {
     return sloc;
@@ -184,6 +194,9 @@ void Sort::reduce(string name)
 		bottle--;
 	if(name=="cup")
 		cup--;
+}
+int Sort::getsLockSort(){
+    return locksortname;
 }
 int Sort::getsStatic(string name)
 {

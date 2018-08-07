@@ -1,27 +1,35 @@
-PROJECT(hkc-test)
+PROJECT(Miracle-New-Comm)
 
-FILE(GLOB hkc-test_SRCS
+FILE(GLOB Miracle-New-Comm_SRCS
     devil.hpp
     devil.cpp
     main.cpp
     Task.h
     Task.cpp
-    Node.h
     Sort.h
     Sort.cpp
+    Node.h
     Robot.h
+    createTree.cpp
     Robot.cpp
     InfoCons.h
     InfoCons.cpp
     class.h
-    createTree.cpp
-    dealwithtask.cpp
     readyadvence.h
     readyadvence.cpp
+    Graph.h
+    dealwithtask.cpp
+    planwithtask.cpp
+    planwithcons_not_info.cpp
+    action.cpp
+    Nature.h
+    Nature.cpp
+    Tasknum.h
+    Tasknum.cpp
 )
-SOURCE_GROUP("" FILES ${hkc-test_SRCS})
+SOURCE_GROUP("" FILES ${Miracle-New-Comm_SRCS})
 
-ADD_EXECUTABLE(hkc-test ${hkc-test_SRCS})
+ADD_EXECUTABLE(Miracle-New-Comm ${Miracle-New-Comm_SRCS})
 
-ADD_DEPENDENCIES(hkc-test frame utility)
-TARGET_LINK_LIBRARIES(hkc-test frame utility ${Boost_LIBRARIES})
+ADD_DEPENDENCIES(Miracle-New-Comm frame utility)
+TARGET_LINK_LIBRARIES(Miracle-New-Comm frame utility ${Boost_LIBRARIES})
