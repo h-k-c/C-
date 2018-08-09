@@ -47,9 +47,9 @@ namespace _home
 		void dealWithErrorInfo(Task task[],int taskNum,Sort sort[]);
 		void checkHold(Robot &robot,Graph &G);
 		void checkPlate(Robot &plate,Graph &G);
-        	void CreateAndPut(std::vector<Btree*> &Tasktree,Task task[],Sort sort[],Robot robot,int Num,int taskNum,InfoCons cons_not[],int cons_not_Max,InfoCons cons_notnot[],int cons_notnotMax); 
+        	void CreateAndPut(std::vector<Btree*> &Tasktree,Task task[],Sort sort[],Robot &robot,int Num,int taskNum,InfoCons cons_not[],int cons_not_Max,InfoCons cons_notnot[],int cons_notnotMax); 
 int findSortByName(string name,string color,int sNum,int taskNum,Task task[],Sort sort[],InfoCons cons_not[],int cons_not_Max,InfoCons cons_notnot[],int cons_notnotMax,Robot robot); 
-        	void dealWithTask(std::vector<Btree*> Tasktree,Task task[],int taskMax,Robot &robot,Sort sort[],int sNum);
+        	void dealWithTask(std::vector<Btree*> Tasktree,Task task[],int taskMax,Robot &robot,Sort sort[],int sNum,InfoCons cons_notnot[],int cons_notnotMax,InfoCons cons_not[],int cons_not_Max);
         void Plan();
 		void getLostLocFromTask(Task task[],int taskNum,Sort sort[]);
         void Fini();

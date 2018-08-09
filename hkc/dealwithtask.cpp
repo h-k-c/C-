@@ -10,23 +10,23 @@ int findSort(string name,Sort sort[],int sNum){
     }
     return -1;
 }
-int checkNeed(Task task[],int Tasknum,int num,Sort sort[]){
+int checkNeed(Task task[],int Tasknum,int num,Sort sort[],Robot robot,InfoCons cons_notnot[],int cons_notnot_Max){
     int need=0;
-    for(int u=0;u<=Tasknum;u++){
-        if(task[u].getTaskNamex()==sort[num-1].getsName()){
-            if(task[u].getTaskAction()=="putdown"){
-                need=0;
-                break;
-            }
-            else{
+    for(int h=0;h<=cons_notnot_Max;h++){
+        //如果盘子里的是约束条件的话就不放下
+        if(cons_notnot[h].getState()=="plate"&&cons_notnot[h].getNamex()==sort[robot.getPlate()-1].getsName()&&cons_notnot[h].getColorx()==sort[robot.getPlate()-1].getsColor()){
                 need=1;
-                break;
+                return need;
+        }
+        for(int x=0;x<=Tasknum;x++){
+            if(task[x].getTaskNamex()==sort[robot.getPlate()-1].getsName()&&task[x].getTaskColorx()==sort[robot.getPlate()-1].getsColor()){
+                need=1;
             }
         }
     }
     return need;
 }
-void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Robot &robot,Sort sort[],int sNum){
+void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Robot &robot,Sort sort[],int sNum,InfoCons cons_notnot[],int cons_notnot_Max,InfoCons cons_not[],int cons_not_Max){
     //通过循环来遍历容器中的节点，然后当便利到一个节点的时候就执行节点里面里面的动作。
     cout<<"开始执行动作"<<endl;
     std::vector<Btree*>::iterator testit;//用来遍历容器中的节点；
@@ -41,25 +41,20 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
         }
  //首先把机器人手中的物体放下，在不违反约束的情况下；
         if(robot.getHold()!=0&&i==1){
-            need=checkNeed(task,Tasknum,robot.getHold(),sort);
-            if(need==0){
                 PutDown(robot.getHold());
                 sort[robot.getHold()-1].setsLoc(robot.getLoc());
                 robot.setHold(0);
-            }
-            else{
-                cout<<"我需要这个物体，不需要放下"<<endl;
-            }
         }
         //把机器人盘子中的东西放下，如果有东西的话
        if(robot.getPlate()!=0&&i==1){
-           needPlate=checkNeed(task,Tasknum,robot.getPlate(),sort);
+           needPlate=checkNeed(task,Tasknum,robot.getPlate(),sort,robot,cons_notnot,cons_notnot_Max);
            if(needPlate==0){
                if(robot.getHold()==0){
                     FromPlate(robot.getPlate());
                     PutDown(robot.getPlate());
                     sort[robot.getPlate()-1].setsLoc(robot.getLoc());
                     robot.setPlate(0);
+                    robot.setHold(0);
                 }
                else{
                   PutDown(robot.getHold());
@@ -95,29 +90,21 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                     if(testisc->second=="pickup"){
                         cout<<"准备执行pickup"<<testisc->first<<"的动作"<<endl;
                         //执行pickup的动作，pickup里面的是testisc->first；
-                       /* if((*testit)->next==NULL){
-                            if(robot.getHold()==0&&robot.getPlate()==0){
-                                PickUp(testisc->first);
-                                ToPlate(testisc->first);
-                                robot.setPlate(testisc->first);
-                            }
-                        }*/
-                        if(robot.getHold()!=0&&robot.getHold()!=testisc->first){
-                            PutDown(robot.getHold());
-                            robot.setHold(0);
+                        if(robot.getHold()==testisc->first||robot.getPlate()==testisc->first){
+                            cout<<"物体已经在我的手上"<<endl;
                         }
-                        if(robot.getHold()!=0&&robot.getPlate()==0){
+                        if(robot.getHold()!=testisc->first&&robot.getHold()!=0&&robot.getPlate()==0){
                             cout<<"机器人手中有东西，把他放到盘子上"<<endl;
                             //把物体放到盘子上
                             ToPlate(robot.getHold()); 
                             robot.setPlate(robot.getHold());
                             robot.setHold(0);
                             PickUp(testisc->first);
-                            robot.setHold(testisc->first);
+                             robot.setHold(testisc->first);
                             cout<<"已经把手中的东西放到了盘子上"<<endl;
                             //更新状态
                         }
-                       else if(sort[testisc->first-1].getsInside()!=-1){
+                       else if(sort[testisc->first-1].getsInside()!=-1&&robot.getHold()==0){
                                 if(sort[testis->first-1].getsClosed()){
                                     Open(sort[testisc->first-1].getsInside());
                                     sort[sort[testisc->first-1].getsInside()-1].setsClosed("opened");
@@ -127,9 +114,6 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                                 sort[testisc->first-1].setsInside(-1);
                                 robot.setHold(testisc->first);
                                 cout<<"已经把物体从容器中取出"<<endl;
-                        }
-                       else if(robot.getPlate()==testisc->first||robot.getHold()==testisc->first){
-                                cout<<"物体已经在我盘子上了"<<endl;
                         }
                        else if(robot.getHold()==0){
                                 PickUp(testisc->first);
@@ -151,9 +135,10 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                             robot.setPlate(0);
                             PutDown(testisc->first);
                             PickUp(coppy);
+                            robot.setHold(coppy);
                             cout<<"已经把物体拿到手上"<<endl;
                         }
-                        if(robot.getHold()==0&&robot.getPlate()==testisc->first){
+                        else if(robot.getHold()==0&&robot.getPlate()==testisc->first){
                             FromPlate(testisc->first);
                             robot.setPlate(0);
                             robot.setHold(testisc->first);
@@ -164,9 +149,8 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                         }
                         else{
                             PutDown(testisc->first);
-                            sort[testisc->first-1].setsLoc(testis->first);
                             robot.setHold(0);
-                            cout<<"已经把手中的"<<testisc->first<<"放下了"<<endl;
+                            sort[testisc->first-1].setsLoc(testis->first);
                         }
                     }
                     if(testisc->second=="putin"){
@@ -180,6 +164,7 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                                Open(testis->first);
                                sort[testis->first-1].setsClosed("opened");
                                 PickUp(robot.getHold());
+                                robot.setHold(robot.getHold());
                             }
                             else{
                                 cout<<"这个容器是关着的,我把它打开"<<endl;
@@ -220,7 +205,10 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                         //更新物体的状态
                         //如果手中有物体的话先把他放在盘子里
                         cout<<"准备执行takeout动作"<<endl;
-                        if(robot.getHold()!=0&&robot.getPlate()==0){
+                        if(robot.getHold()==testisc->first||robot.getPlate()==testisc->first){
+                            cout<<"已经在我的盘子里或者手上"<<endl;
+                        }
+                        else if(robot.getHold()!=0&&robot.getPlate()==0){
                             cout<<"我手中有东西，我先把他放到盘子里"<<endl;
                             ToPlate(robot.getHold());
                             robot.setPlate(robot.getHold());
@@ -237,7 +225,7 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                             robot.setHold(testisc->first);
                             cout<<"执行takeout成功"<<endl;
                         }
-                        if(robot.getHold()==0&&robot.getPlate()!=0){
+                        else if(robot.getHold()==0&&robot.getPlate()!=0){
                             if(sort[testis->first-1].getsClosed()){
                                 Open(testis->first);
                                 sort[testis->first-1].setsClosed("opened");
@@ -246,7 +234,11 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                             sort[testisc->first-1].setsInside(0);
                             robot.setHold(testisc->first);
                         }
-                        if(robot.getHold()==0&&robot.getPlate()==0){
+                        else if(robot.getHold()==0&&robot.getPlate()==0){
+                                if(sort[testis->first-1].getsClosed()){
+                                Open(testis->first);
+                                sort[testis->first-1].setsClosed("opened");
+                            }
                             TakeOut(testisc->first,testis->first);
                             sort[testisc->first-1].setsInside(0);
                             robot.setHold(testisc->first);
@@ -274,7 +266,11 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                             cout<<"I already opened"<<endl;
                         }
                         if(sort[testisc->first-1].getsClosed()){
+                            if(robot.getHold()!=0){
+                                PutDown(robot.getHold());
+                            }
                             Open(testisc->first);
+                            PickUp(robot.getHold());
                             sort[testisc->first-1].setsClosed("opened");
                         }
                         cout<<"已经打开了"<<testisc->first<<endl;
@@ -341,14 +337,14 @@ void Devil::dealWithTask(std::vector<Btree*> Tasktree,Task task[],int Tasknum,Ro
                     Close(f);
                     PickUp(copyNum);
                 }
-                if(robot.getHold()!=0&&robot.getPlate()==0){
+                else if(robot.getHold()!=0&&robot.getPlate()==0){
                     ToPlate(robot.getHold());
                     robot.setPlate(robot.getHold());
                     robot.setHold(0);
                     Close(f);
                    // FromPlate(robot.getPlate());
                 }
-                if(robot.getHold()==0){
+                else if(robot.getHold()==0){
                     Close(f);
                 }
             }

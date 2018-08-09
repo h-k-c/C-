@@ -55,7 +55,7 @@ void Devil::Plan()
     CreateAndPut(taskTree,task,sort,robot,senceMax,taskMax,cons_not,cons_not_Max,cons_notnot,cons_notnotMax);
 
     cout<<"--------------------开始处理任务----------------------------"<<endl;
-    dealWithTask(taskTree,task,taskMax,robot,sort,senceMax);
+    dealWithTask(taskTree,task,taskMax,robot,sort,senceMax,cons_notnot,cons_notnotMax,cons_not,cons_not_Max);
 }
 
 void Devil::Fini()
