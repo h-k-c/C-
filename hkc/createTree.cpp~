@@ -23,26 +23,24 @@ int Devil::findSortByName(string name,string color,int sNum,int taskNum,Task tas
     for(int h=0;h<=sNum;h++){
         for(int k=0;k<=cons_not_Max;k++){
            // cout<<cons_not[k].getNamex()<<cons_not[k].getColorx()<<endl;
-            if(sort[h].getsName()==cons_not[k].getNamex()&&sort[h].getsColor()==cons_not[k].getColorx()&&cons_not[k].getColorx()!=" "&&cons_not[k].getState()!="plate"){
+            if(sort[h].getsName()==cons_not[k].getNamex()&&sort[h].getsColor()==cons_not[k].getColorx()&&cons_not[k].getColorx()!=" "&&cons_not[k].getNamey()!=" "&&cons_not[k].getState()=="takeout"){
                 cout<<cons_not[k].getNamex()<<cons_not[k].getColorx()<<endl;
                 cout<<"约束物体处理成功"<<endl;
                 sort[h].setsLockSort(1);
             }
-            //如果物体的位置实在约束的物体哪里就加上锁
-           /* if(cons_not[k].getNamex()==sort[sort[h].getsLoc()-1].getsName()&&sort[h].getsLoc()!=-1){
-                cout<<cons_not[k].getNamex()<<endl;
-                cout<<sort[h].getsName()<<endl;
-                cout<<sort[sort[h].getsLoc()-1].getsName()<<endl;
-                cout<<"处理约束位置"<<endl;
+            if(sort[h].getsName()==cons_not[k].getNamex()&&sort[h].getsColor()==cons_not[k].getColorx()&&cons_not[k].getNamey()==" "&&cons_not[k].getColorx()!=" "&&(cons_not[k].getState()=="putdown"||cons_not[k].getState()=="pickup")) {
                 sort[h].setsLockSort(1);
-            }*/
+            }
         }
     }
     for(int y=0;y<=sNum;y++){
         for(int z=0;z<=cons_notnotMax;z++){
             //cout<<cons_notnot[z].getNamex()<<cons_notnot[z].getColorx()<<endl;
-            if(cons_notnot[z].getNamex()==sort[y].getsName()&&cons_notnot[z].getColorx()==sort[y].getsColor()&&cons_notnot[z].getState()!="plate"){
+            if(cons_notnot[z].getNamex()==sort[y].getsName()&&cons_notnot[z].getColorx()==sort[y].getsColor()&&cons_notnot[z].getNamey()==" "&&cons_notnot[z].getState()=="plate"){
                 cout<<"bububu"<<endl;
+                sort[y].setsLockSort(1);
+            }
+            if(cons_notnot[z].getNamex()==sort[y].getsName()&&cons_notnot[z].getColorx()==sort[y].getsColor()&&cons_notnot[z].getNamey()!=" "&&(cons_notnot[z].getState()=="on"||cons_notnot[z].getState()=="inside")){
                 sort[y].setsLockSort(1);
             }
         }
@@ -64,6 +62,9 @@ int Devil::findSortByName(string name,string color,int sNum,int taskNum,Task tas
          if(sort[k].getsName()==name){
              if(sort[k].getsColor()==" "&&sort[k].getsName()==name){
                 return k+1;
+             }
+             if(sort[robot.getPlate()-1].getsName()==name&&color==" "&&sort[robot.getPlate()-1].getsLockSort()!=1){
+                return robot.getPlate();
              }
              if(sort[k].getsName()==name&&sort[k].getsColor()==color&&color!=" "&&(sort[k].getsLockSort()!=1||sort[k].getIsTask()==1)){
                 sort[k].setsLockSort(1);
@@ -305,7 +306,7 @@ void Devil::CreateAndPut(std::vector<Btree*> &taskTree,Task task[],Sort sort[],R
     std::string str2;
     cout<<"创建两个节点"<<endl;
     int i;
-    if(taskNum<=(cons_notnotMax+cons_not_Max)){
+    if(taskNum<(cons_notnotMax+cons_not_Max)&&taskNum>=2){
         for(int x=0;x<=taskNum;x++){
             if(task[x].getTaskAction()=="goto"||task[x].getTaskAction()=="close"){
                 continue;
@@ -315,18 +316,85 @@ void Devil::CreateAndPut(std::vector<Btree*> &taskTree,Task task[],Sort sort[],R
     }
     //先检查手里的东西是否需要，就是先处理手里的东西
     for(int v=0;v<=taskNum;v++){
-        if(task[v].getTaskAction()=="give"&&task[v].getTaskNamex()==sort[robot.getHold()-1].getsName()){
-            int d=findHuman(sort,sNum);
-            if(robot.getLoc()==d){
-                PutDown(robot.getHold());
-                sort[robot.getHold()-1].setsLoc(d);
-                robot.setHold(0);
+        if(task[v].getTaskNamex()==sort[robot.getHold()-1].getsName()&&task[v].getTaskColorx()==" "){
+            if(task[v].getTaskAction()=="give"&&task[v].getTaskColorx()==" "){
+                int d=findHuman(sort,sNum);
+                if(robot.getLoc()==d){
+                    PutDown(robot.getHold());
+                    sort[robot.getHold()-1].setsLoc(d);
+                    robot.setHold(0);
+                }
+                else{
+                    Move(d);
+                    if(robot.getPlate()!=0){
+                        sort[robot.getPlate()-1].setsLoc(d);
+                    }
+                    robot.setLoc(d);
+                    PutDown(robot.getHold());
+                    sort[robot.getHold()-1].setsLoc(d);
+                    robot.setHold(0);
+                }
             }
-            else{
-                Move(d);
-                PutDown(robot.getHold());
-                sort[robot.getHold()-1].setsLoc(d);
-                robot.setHold(0);
+            int loc=findBigSort(task[v].getTaskNamey(),sort,sNum);
+            if(task[v].getTaskAction()=="puton"){
+                if(robot.getLoc()==loc){
+                    PutDown(robot.getHold());
+                    sort[robot.getHold()-1].setsLoc(robot.getLoc());
+                    robot.setHold(0);
+                }
+                else{
+                    Move(loc);
+                    if(robot.getPlate()!=0){
+                        sort[robot.getPlate()-1].setsLoc(loc);
+                    }
+                    robot.setLoc(loc);
+                    PutDown(robot.getHold());
+                    sort[robot.getHold()-1].setsLoc(robot.getLoc());
+                    robot.setHold(0);
+                }
+                task[v].setTaskAction(" "," "," ");
+            }
+            if(task[v].getTaskAction()=="putin"){
+                if(robot.getLoc()==loc){
+                    if(sort[robot.getLoc()-1].getsClosed()){
+                        PutDown(robot.getHold());
+                        Open(loc);
+                        PickUp(robot.getHold());
+                        PutIn(robot.getHold(),loc);
+                        sort[robot.getHold()-1].setsInside(loc);
+                        sort[robot.getHold()-1].setsLoc(loc);
+                        robot.setHold(0);
+                    }
+                    else{
+                        PutIn(robot.getHold(),loc);
+                        sort[robot.getHold()-1].setsInside(loc);
+                        sort[robot.getHold()-1].setsLoc(loc);
+                        robot.setHold(0);
+                    }
+                }
+                else{
+                    Move(loc);
+                    if(robot.getPlate()!=0){
+                        sort[robot.getPlate()-1].setsLoc(loc);
+                    }
+                    robot.setLoc(loc);
+                    if(sort[robot.getLoc()-1].getsClosed()){
+                        PutDown(robot.getHold());
+                        Open(loc);
+                        PickUp(robot.getHold());
+                        PutIn(robot.getHold(),loc);
+                        sort[robot.getHold()-1].setsInside(loc);
+                        sort[robot.getHold()-1].setsLoc(loc);
+                        robot.setHold(0);
+                    }
+                    else{
+                        PutIn(robot.getHold(),loc);
+                        sort[robot.getHold()-1].setsInside(loc);
+                        sort[robot.getHold()-1].setsLoc(loc);
+                        robot.setHold(0);
+                    }
+                }
+                task[v].setTaskAction(" "," "," ");
             }
         }
         if(robot.getHold()!=0&&task[v].getTaskNamex()==sort[robot.getHold()-1].getsName()&&task[v].getTaskColorx()==sort[robot.getHold()-1].getsColor()&&task[v].getTaskColorx()!=""){
@@ -340,6 +408,7 @@ void Devil::CreateAndPut(std::vector<Btree*> &taskTree,Task task[],Sort sort[],R
                 }
                 else{
                     Move(l);
+                    robot.setLoc(l);
                     PutDown(robot.getHold());
                     sort[robot.getHold()-1].setsLoc(l);
                     robot.setHold(0);
@@ -365,6 +434,7 @@ void Devil::CreateAndPut(std::vector<Btree*> &taskTree,Task task[],Sort sort[],R
                 }
                 else{
                     Move(l);
+                    robot.setLoc(l);
 	                if(sort[l-1].getsClosed()){
                         PutDown(robot.getHold());
                         Open(l);
@@ -389,12 +459,167 @@ void Devil::CreateAndPut(std::vector<Btree*> &taskTree,Task task[],Sort sort[],R
                 }
                 else{
                     Move(l);
+                    robot.setLoc(l);
                     PutDown(robot.getHold());
                     sort[robot.getHold()-1].setsLoc(l);
                     robot.setHold(0);
                 }
             }
         task[v].setTaskAction("","","");
+        }
+    }
+    if(robot.getHold()!=0){
+        PutDown(robot.getHold());
+        sort[robot.getHold()-1].setsLoc(robot.getLoc());
+        robot.setHold(0);
+    }
+    if(robot.getPlate()!=0){
+        //通过一个循环来判断盘子中的物体是否不让被拿起
+        for(int u=0;u<=taskNum;u++){
+            for(int m=0;m<=cons_notnotMax;m++){
+                if(cons_notnot[m].getState()=="plate"&&cons_notnot[m].getNamex()==task[u].getTaskNamex()&&cons_notnot[m].getColorx()==task[u].getTaskColorx()&&task[u].getTaskColorx()!=" "){
+                    task[m].setTaskAction(" "," "," ");
+                    break;
+                }
+            }
+            //先处理任务中的物体是不是有颜色
+            if(task[u].getTaskNamex()==sort[robot.getPlate()-1].getsName()&&task[u].getTaskColorx()==" "){
+                if(task[u].getTaskAction()=="give"){
+                    int findman=findHuman(sort,sNum);
+                    if(robot.getLoc()==findman){
+                        FromPlate(robot.getPlate());
+                        PutDown(robot.getPlate());
+                        robot.setHold(0);
+                        robot.setPlate(0);
+                    }
+                    else{
+                        Move(findman);
+                        robot.setLoc(findman);
+                        FromPlate(robot.getPlate());
+                        PutDown(robot.getPlate());
+                        robot.setHold(0);
+                        robot.setPlate(0);
+                    }
+                    task[u].setTaskAction(" ", " "," ");
+                }
+                if(task[u].getTaskAction()=="putdown"){
+                    FromPlate(robot.getPlate());
+                    PutDown(robot.getPlate());
+                    sort[robot.getPlate()-1].setsLoc(robot.getLoc());
+                    robot.setPlate(0);
+                 task[u].setTaskAction(" "," "," ");
+                }
+                int loc1=findBigSort(task[u].getTaskNamey(),sort,sNum);
+                if(task[u].getTaskAction()=="puton"){
+                    if(robot.getLoc()==loc1){
+                        FromPlate(robot.getPlate());
+                        PutDown(robot.getPlate());
+                        sort[robot.getPlate()-1].setsLoc(robot.getLoc());
+                        robot.setPlate(0);
+                    }
+                    else{
+                        Move(loc1);
+                        robot.setLoc(loc1);
+                        FromPlate(robot.getPlate());
+                        PutDown(robot.getPlate());
+                        sort[robot.getPlate()-1].setsLoc(loc1);
+                        robot.setPlate(0);
+                    }
+                    task[u].setTaskAction(" "," "," ");
+                }
+                if(){
+                    
+                }
+            }
+            //在处理任务中的物体有颜色的
+            if(task[u].getTaskNamex()==sort[robot.getPlate()-1].getsName()&&task[u].getTaskColorx()==sort[robot.getPlate()-1].getsColor()&&task[u].getTaskColorx()!=" "){
+                if(task[u].getTaskAction()=="putdown"){
+                    if(robot.getHold()==0){
+                        FromPlate(robot.getPlate());
+                        PutDown(robot.getPlate());
+                        sort[robot.getPlate()-1].setsLoc(robot.getLoc());
+                        robot.setPlate(0);
+                        robot.setHold(0);
+                    }
+                    task[u].setTaskAction(" "," "," ");
+                }
+                if(task[u].getTaskAction()=="give"){
+                   int human=findHuman(sort,sNum);
+                    if(robot.getLoc()==human){
+                        FromPlate(robot.getPlate());
+                        PutDown(robot.getPlate());
+                        robot.setPlate(0);
+                        robot.setHold(0);
+                    }
+                    else{
+                        Move(human);
+                        robot.setLoc(human);
+                        FromPlate(robot.getPlate());
+                        PutDown(robot.getPlate());
+                        robot.setHold(0);
+                        robot.setPlate(0);
+                    }
+                    task[u].setTaskAction(" "," "," ");
+                }
+                int loc2=findBigSort(task[u].getTaskNamey(),sort,sNum);
+                if(task[u].getTaskAction()=="puton"){
+                    if(robot.getLoc()==loc2){
+                        FromPlate(robot.getPlate());
+                        PutDown(robot.getHold());
+                        sort[robot.getPlate()-1].setsLoc(robot.getLoc());
+                        robot.setPlate(0);
+                        robot.setHold(0);
+                    }
+                    else{
+                        Move(loc2);
+                        robot.setLoc(loc2);
+                        FromPlate(robot.getPlate());
+                        PutDown(robot.getPlate());
+                        sort[robot.getPlate()-1].setsLoc(loc2);
+                        robot.setPlate(0);
+                    }
+                    task[u].setTaskAction(" "," "," ");
+                }
+                if(task[u].getTaskAction()=="putin"){
+                    if(robot.getLoc()==loc2){
+                        if(sort[loc2-1].getsClosed()){
+                            Open(loc2);
+                            FromPlate(robot.getPlate());
+                            PutIn(robot.getPlate(),loc2);
+                            sort[robot.getPlate()-1].setsLoc(loc2);
+                            robot.setPlate(0);
+                            robot.setHold(0);
+                        }
+                        else{
+                            FromPlate(robot.getPlate());
+                            PutIn(robot.getPlate(),loc2);
+                            sort[robot.getPlate()-1].setsLoc(loc2);
+                            robot.setPlate(0);
+                            robot.setHold(0);
+                        }
+                    }
+                    else{
+                        Move(loc2);
+                        robot.setLoc(loc2);
+                        if(sort[loc2-1].getsClosed()){
+                            Open(loc2);
+                            FromPlate(robot.getPlate());
+                            PutIn(robot.getPlate(),loc2);
+                            sort[robot.getPlate()-1].setsLoc(loc2);
+                            robot.setPlate(0);
+                            robot.setHold(0);
+                        }
+                        else{
+                            FromPlate(robot.getPlate());
+                            PutIn(robot.getPlate(),loc2);
+                            sort[robot.getPlate()-1].setsLoc(loc2);
+                            robot.setPlate(0);
+                            robot.setHold(0);
+                        }
+                    }
+                    task[u].setTaskAction(" "," "," ");
+                }
+            }
         }
     }
     //执行之前判断机器人手中是否有物体如果有的话就把物体的位置更新；
@@ -481,14 +706,19 @@ void Devil::CreateAndPut(std::vector<Btree*> &taskTree,Task task[],Sort sort[],R
         int state1=findStateByName(sortNum1,sNum,sort);
         int flag=0;	            
         for(int m=0;m<=cons_not_Max;m++){
-                    if(cons_not[m].getNamex()==sort[state1-1].getsName()){
-                        cout<<"物体的位置是在约束内，所以不能执行"<<endl;
-                        flag=1;
-                        break;
+                    if(cons_not[m].getNamex()==sort[state1-1].getsName()&&cons_not[m].getNamey()==""&&cons_not[m].getColorx()==" "&&(cons_not[m].getState()=="opened"||cons_not[m].getState()=="goto")){
+                        if(cons_not[m].getState()=="opened"&&sort[sortNum1-1].getsInside()!=state1){
+                            flag=0;
+                        }
+                        else{
+                            cout<<"物体的位置是在约束内，所以不能执行"<<endl;
+                            flag=1;
+                            break;
+                        }
                     }
                 }
         for(int g=0;g<=cons_notnotMax;g++){
-            if(cons_notnot[g].getNamex()==sort[sortNum1-1].getsName()&&cons_notnot[g].getColorx()==sort[sortNum1-1].getsColor()){
+            if(cons_notnot[g].getNamex()==sort[sortNum1-1].getsName()&&cons_notnot[g].getColorx()==" "&&cons_notnot[g].getNamey()==" "&&(cons_notnot[g].getState()=="goto"||cons_notnot[g].getState()=="opened")){
                 flag=1;
                 break;
             }

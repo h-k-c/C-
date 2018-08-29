@@ -1,6 +1,6 @@
-PROJECT(Miracle-New-Comm)
+PROJECT(emmmm)
 
-FILE(GLOB Miracle-New-Comm_SRCS
+FILE(GLOB emmmm_SRCS
     devil.hpp
     devil.cpp
     main.cpp
@@ -27,9 +27,9 @@ FILE(GLOB Miracle-New-Comm_SRCS
     Tasknum.h
     Tasknum.cpp
 )
-SOURCE_GROUP("" FILES ${Miracle-New-Comm_SRCS})
+SOURCE_GROUP("" FILES ${emmmm_SRCS})
 
-ADD_EXECUTABLE(Miracle-New-Comm ${Miracle-New-Comm_SRCS})
+ADD_EXECUTABLE(emmmm ${emmmm_SRCS})
 
-ADD_DEPENDENCIES(Miracle-New-Comm frame utility)
-TARGET_LINK_LIBRARIES(Miracle-New-Comm frame utility ${Boost_LIBRARIES})
+ADD_DEPENDENCIES(emmmm frame utility)
+TARGET_LINK_LIBRARIES(emmmm frame utility ${Boost_LIBRARIES})

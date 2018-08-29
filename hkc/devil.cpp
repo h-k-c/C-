@@ -6,7 +6,7 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////////
 Devil::Devil() :
- Plug("Miracle-test")
+ Plug("emmmm")
 {
 	countMove = 0;
 }
@@ -51,10 +51,9 @@ void Devil::Plan()
     planwithcons_not_info(cons_not,task,sort,robot,cons_not_Max,taskMax);
     planwithcons_notnot_info(cons_notnot,task,sort,robot,cons_notnotMax,taskMax);
     printTask(task,taskMax);
-    //planWithtask(task,sort,taskMax,senceMax,robot,G);
     CreateAndPut(taskTree,task,sort,robot,senceMax,taskMax,cons_not,cons_not_Max,cons_notnot,cons_notnotMax);
 
-    cout<<"--------------------开始处理任务----------------------------"<<endl;
+   // cout<<"--------------------开始处理任务----------------------------"<<endl;
     dealWithTask(taskTree,task,taskMax,robot,sort,senceMax,cons_notnot,cons_notnotMax,cons_not,cons_not_Max);
 }
 

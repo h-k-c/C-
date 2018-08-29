@@ -1,6 +1,6 @@
-PROJECT(Miracle-New-Comm)
+PROJECT(Miracle-own)
 
-FILE(GLOB Miracle-New-Comm_SRCS
+FILE(GLOB Miracle-own_SRCS
     devil.hpp
     devil.cpp
     main.cpp
@@ -18,6 +18,7 @@ FILE(GLOB Miracle-New-Comm_SRCS
     readyadvence.h
     readyadvence.cpp
     Graph.h
+    dealwithtask.cpp
     planwithtask.cpp
     planwithcons_not_info.cpp
     action.cpp
@@ -26,9 +27,9 @@ FILE(GLOB Miracle-New-Comm_SRCS
     Tasknum.h
     Tasknum.cpp
 )
-SOURCE_GROUP("" FILES ${Miracle-New-Comm_SRCS})
+SOURCE_GROUP("" FILES ${Miracle-own_SRCS})
 
-ADD_EXECUTABLE(Miracle-New-Comm ${Miracle-New-Comm_SRCS})
+ADD_EXECUTABLE(Miracle-own ${Miracle-own_SRCS})
 
-ADD_DEPENDENCIES(Miracle-New-Comm frame utility)
-TARGET_LINK_LIBRARIES(Miracle-New-Comm frame utility ${Boost_LIBRARIES})
+ADD_DEPENDENCIES(Miracle-own frame utility)
+TARGET_LINK_LIBRARIES(Miracle-own frame utility ${Boost_LIBRARIES})
